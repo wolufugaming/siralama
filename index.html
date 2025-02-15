@@ -1,20 +1,50 @@
+<?php
+// Veritabanı bağlantısı
+include('config.php');
+$conn = new mysqli($config['database']['host'], $config['database']['user'], $config['database']['password'], $config['database']['name']);
+
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+// Veritabanından veri çekme
+$query = "SELECT * FROM ruststats ORDER BY kills DESC LIMIT 10";
+$result = $conn->query($query);
+?>
+
 <!DOCTYPE html>
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="dark.css">
-<title>Benim Web Sitem</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            padding: 50px;
-        }
-    </style>
+    <title>Rust Stats</title>
+    <link rel="stylesheet" href="dark.css"> <!-- Dark teması -->
 </head>
 <body>
-    <h1>Merhaba, dünya!</h1>
-    <p>Bu benim GitHub Pages ile oluşturduğum ilk web sitem.</p>
+    <div class="container">
+        <h1>Rust Oyuncu İstatistikleri</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>Oyuncu</th>
+                    <th>Öldürme</th>
+                    <th>Ölüm</th>
+                    <th>K/D Oranı</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php while($row = $result->fetch_assoc()) { ?>
+                    <tr>
+                        <td><?php echo $row['player_name']; ?></td>
+                        <td><?php echo $row['kills']; ?></td>
+                        <td><?php echo $row['deaths']; ?></td>
+                        <td><?php echo number_format($row['kills'] / max($row['deaths'], 1), 2); ?></td>
+                    </tr>
+                <?php } ?>
+            </tbody>
+        </table>
+    </div>
 </body>
 </html>
+
+<?php $conn->close(); ?>
